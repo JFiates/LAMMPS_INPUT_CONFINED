@@ -1,0 +1,210 @@
+#Graphene/electrolyte zero charge
+processors * * * grid numa
+
+# Intialization
+units		real
+dimension	3
+boundary	p p f
+atom_style	full
+
+variable	NRUNVE equal 2E6
+variable	NRUNVP1 equal 4E6
+variable	NRUNVP2 equal 4E6
+variable	NRUNVP3 equal 4E6
+variable	NRUNVP4 equal 4E6
+variable	NRUNVP5 equal 4E6
+variable	NRUNVP6 equal 4E6
+variable	NRUNVP7 equal 4E6
+variable	NRUNVP8 equal 4E6
+variable	NRUNVP9 equal 4E6
+variable	NRUNVP10 equal 4E6
+variable	VTEMP equal 298	
+variable	VPRES equal 1.0 
+pair_style      lj/charmm/coul/long 10.0 12.0
+pair_modify	mix arithmetic 
+bond_style 	harmonic
+angle_style 	harmonic
+dihedral_style 	charmm
+kspace_style	pppm 1.0E-4
+kspace_modify	slab 3.0
+ 
+read_restart	final_restart.data
+
+set		mol 264 charge -0.01733
+set		mol 265 charge 0.01733
+
+region		side1 block EDGE EDGE EDGE EDGE -13.225 0.175 side in units box 
+region		side2 block EDGE EDGE EDGE EDGE 76.825 90.225 side in units box
+region		graphene union 2 side1 side2	
+
+group		tegdme type 1 2 3
+group		li type 4
+group		pf6 type 5 6
+group		electrolyte union tegdme li pf6
+group 		carbon type 8
+group		all union electrolyte carbon
+
+# Settings
+timestep	1.0
+neighbor	2.0 bin 
+neigh_modify	delay 0 every 1 check yes
+
+# Operations
+thermo		1
+thermo_style	custom time temp press pe ke etotal density vol
+fix		plates carbon wall/region graphene lj126 0.0859 3.3997 12.0 
+fix		1 electrolyte nvt temp ${VTEMP} ${VTEMP} 100 
+fix		2 all balance 10000 1.02 shift xyz 20 1.02
+
+
+
+
+# Action - Equilibration
+run		${NRUNVE}
+
+reset_timestep	0
+
+# Output NVT
+dump		myDump1.1 tegdme custom 1000 tegdme1.data id mol type mass xu yu zu
+dump		myDump2.1 li custom 10 li1.data id type mass xu yu zu
+dump		myDump3.1 pf6 custom 10 pf1.data id type mass xu yu zu
+
+# Action - Production1 
+run		${NRUNVP1}
+
+undump		myDump1.1
+undump		myDump2.1
+undump		myDump3.1
+
+
+
+
+# Output NVT
+dump		myDump1.2 tegdme custom 1000 tegdme2.data id mol type mass xu yu zu
+dump		myDump2.2 li custom 10 li2.data id type mass xu yu zu
+dump		myDump3.2 pf6 custom 10 pf2.data id type mass xu yu zu
+
+
+# Action - Production2 
+run		${NRUNVP2}
+
+
+undump		myDump1.2
+undump		myDump2.2
+undump		myDump3.2
+
+
+# Output NVT
+dump		myDump1.3 tegdme custom 1000 tegdme3.data id mol type mass xu yu zu
+dump		myDump2.3 li custom 10 li3.data id type mass xu yu zu
+dump		myDump3.3 pf6 custom 10 pf3.data id type mass xu yu zu
+
+
+# Action - Production3 
+run		${NRUNVP3}
+
+
+undump		myDump1.3
+undump		myDump2.3
+undump		myDump3.3
+
+
+
+# Output NVT
+dump		myDump1.4 tegdme custom 1000 tegdme4.data id mol type mass xu yu zu
+dump		myDump2.4 li custom 10 li4.data id type mass xu yu zu
+dump		myDump3.4 pf6 custom 10 pf4.data id type mass xu yu zu
+
+
+# Action - Production4 
+run		${NRUNVP4}
+
+
+undump		myDump1.4
+undump		myDump2.4
+undump		myDump3.4
+
+
+
+# Output NVT
+dump		myDump1.5 tegdme custom 1000 tegdme5.data id mol type mass xu yu zu
+dump		myDump2.5 li custom 10 li5.data id type mass xu yu zu
+dump		myDump3.5 pf6 custom 10 pf5.data id type mass xu yu zu
+
+
+# Action - Production5 
+run		${NRUNVP5}
+
+undump		myDump1.5
+undump		myDump2.5
+undump		myDump3.5
+
+
+# Output NVT
+dump		myDump1.6 tegdme custom 1000 tegdme6.data id mol type mass xu yu zu
+dump		myDump2.6 li custom 10 li6.data id type mass xu yu zu
+dump		myDump3.6 pf6 custom 10 pf6.data id type mass xu yu zu
+
+
+# Action - Production5 
+run		${NRUNVP6}
+
+undump		myDump1.6
+undump		myDump2.6
+undump		myDump3.6
+
+# Output NVT
+dump		myDump1.7 tegdme custom 1000 tegdme7.data id mol type mass xu yu zu
+dump		myDump2.7 li custom 10 li7.data id type mass xu yu zu
+dump		myDump3.7 pf6 custom 10 pf7.data id type mass xu yu zu
+
+
+# Action - Production5 
+run		${NRUNVP7}
+
+undump		myDump1.7
+undump		myDump2.7
+undump		myDump3.7
+
+
+# Output NVT
+dump		myDump1.8 tegdme custom 1000 tegdme8.data id mol type mass xu yu zu
+dump		myDump2.8 li custom 10 li8.data id type mass xu yu zu
+dump		myDump3.8 pf6 custom 10 pf8.data id type mass xu yu zu
+
+
+# Action - Production5 
+run		${NRUNVP8}
+
+undump		myDump1.8
+undump		myDump2.8
+undump		myDump3.8
+
+
+# Output NVT
+dump		myDump1.9 tegdme custom 1000 tegdme9.data id mol type mass xu yu zu
+dump		myDump2.9 li custom 10 li9.data id type mass xu yu zu
+dump		myDump3.9 pf6 custom 10 pf9.data id type mass xu yu zu
+
+
+# Action - Production5 
+run		${NRUNVP9}
+
+undump		myDump1.9
+undump		myDump2.9
+undump		myDump3.9
+
+
+# Output NVT
+dump		myDump1.10 tegdme custom 1000 tegdme10.data id mol type mass xu yu zu
+dump		myDump2.10 li custom 10 li10.data id type mass xu yu zu
+dump		myDump3.10 pf6 custom 10 pf10.data id type mass xu yu zu
+
+
+# Action - Production5 
+run		${NRUNVP10}
+
+undump		myDump1.10
+undump		myDump2.10
+undump		myDump3.10
+

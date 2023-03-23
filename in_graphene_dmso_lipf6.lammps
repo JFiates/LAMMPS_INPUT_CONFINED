@@ -1,0 +1,141 @@
+#Graphene charged/electrolyte 
+processors * * * grid numa
+
+# Intialization
+units		real
+dimension	3
+boundary	p p f
+atom_style	full
+
+variable	NRUNVE equal 20E6
+variable	NRUNVP1 equal 2E6
+variable	NRUNVP2 equal 2E6
+variable	NRUNVP3 equal 2E6
+variable	NRUNVP4 equal 2E6
+variable	NRUNVP5 equal 2E6
+variable	VTEMP equal 298	
+variable	VPRES equal 1.0 
+pair_style      lj/charmm/coul/long 10.0 12.0
+pair_modify	mix arithmetic 
+bond_style 	harmonic
+angle_style 	harmonic
+dihedral_style 	charmm
+kspace_style	pppm 1.0E-4
+kspace_modify	slab 3.0
+ 
+read_data	mysystem.data
+
+set		mol 596 charge -0.0260
+set		mol 597 charge 0.0260
+
+region		side1 block EDGE EDGE EDGE EDGE -13.225 0.175 side in units box 
+region		side2 block EDGE EDGE EDGE EDGE 76.825 90.225 side in units box
+region		graphene union 2 side1 side2	
+
+group		dmso type 1 2 3 4
+group		li type 5
+group		pf6 type 6 7
+group		electrolyte union dmso li pf6
+group 		carbon type 8
+group		all union electrolyte carbon
+
+# Setup atoms 
+velocity	electrolyte create ${VTEMP} 123 mom yes rot yes dist gaussian  
+
+# Settings
+timestep	1.0
+neighbor	2.0 bin 
+neigh_modify	delay 0 every 1 check yes
+
+# Operations
+thermo		1
+thermo_style	custom time temp press pe ke etotal density vol
+fix		plates carbon wall/region graphene lj126 0.0859 3.3997 12.0 
+fix		1 electrolyte nvt temp ${VTEMP} ${VTEMP} 100 
+fix		2 all balance 10000 1.02 shift xyz 20 1.02
+
+# Restart file
+write_restart	new_restart.dat
+
+# Action - Equilibration
+run		${NRUNVE}
+
+reset_timestep	0
+
+# Output NVT
+dump		myDump1.1 dmso custom 100 dmso1.data id mol type mass xu yu zu
+dump		myDump2.1 li custom 5 li1.data id type mass xu yu zu
+dump		myDump3.1 pf6 custom 5 pf1.data id type mass xu yu zu
+dump		myDump4.1 electrolyte custom 100 g1.data mol type xu yu zu
+dump		myDump5.1 all xyz 10000 all1.xyz
+dump		myDump6.1 electrolyte custom 2000 vis1.lammpstrj id type xu yu zu q
+
+# Action - Production1 
+run		${NRUNVP1}
+
+undump		myDump1.1
+undump		myDump2.1
+undump		myDump3.1
+undump		myDump4.1
+undump		myDump5.1
+undump		myDump6.1
+
+# Output NVT
+dump		myDump1.2 dmso custom 100 dmso2.data id mol type mass xu yu zu
+dump		myDump2.2 li custom 5 li2.data id type mass xu yu zu
+dump		myDump3.2 pf6 custom 5 pf2.data id type mass xu yu zu
+dump		myDump4.2 electrolyte custom 2000 vis2.lammpstrj id type xu yu zu q
+
+# Action - Production2 
+run		${NRUNVP2}
+
+undump		myDump1.2
+undump		myDump2.2
+undump		myDump3.2
+undump		myDump4.2
+
+# Output NVT
+dump		myDump1.3 dmso custom 100 dmso3.data id mol type mass xu yu zu
+dump		myDump2.3 li custom 5 li3.data id type mass xu yu zu
+dump		myDump3.3 pf6 custom 5 pf3.data id type mass xu yu zu
+dump		myDump4.3 electrolyte custom 2000 vis3.lammpstrj id type xu yu zu q
+
+# Action - Production3 
+run		${NRUNVP3}
+
+undump		myDump1.3
+undump		myDump2.3
+undump		myDump3.3
+undump		myDump4.3
+
+# Output NVT
+dump		myDump1.4 dmso custom 100 dmso4.data id mol type mass xu yu zu
+dump		myDump2.4 li custom 5 li4.data id type mass xu yu zu
+dump		myDump3.4 pf6 custom 5 pf4.data id type mass xu yu zu
+dump		myDump4.4 electrolyte custom 2000 vis4.lammpstrj id type xu yu zu q
+
+# Action - Production4 
+run		${NRUNVP4}
+
+undump		myDump1.4
+undump		myDump2.4
+undump		myDump3.4
+undump		myDump4.4
+
+# Output NVT
+dump		myDump1.5 dmso custom 100 dmso5.data id mol type mass xu yu zu
+dump		myDump2.5 li custom 5 li5.data id type mass xu yu zu
+dump		myDump3.5 pf6 custom 5 pf5.data id type mass xu yu zu
+dump		myDump4.5 electrolyte custom 2000 vis5.lammpstrj id type xu yu zu q
+
+# Action - Production5 
+run		${NRUNVP5}
+
+undump		myDump1.5
+undump		myDump2.5
+undump		myDump3.5
+undump		myDump4.5
+
+
+
+
